@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 @Getter
-@Entity
+@Entity //Blog라는 클래스를 데이터베이스의 Blog라는 테이블과 mapping하기 위해 사용
 @NoArgsConstructor
 public class Blog extends Timestamped{
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -36,6 +36,13 @@ public class Blog extends Timestamped{
     public Blog(BlogRequestDto requestDto) {
         //오버로딩된 생성자를 통해서 주입
         //dto에 private임에도 불구하고 getter 메서드를 사용하여 데이터를 가져옴.
+        this.title = requestDto.getTitle();
+        this.username = requestDto.getUsername();
+        this.content = requestDto.getContent();
+        this.password = requestDto.getPassword();
+    }
+
+    public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.username = requestDto.getUsername();
         this.content = requestDto.getContent();

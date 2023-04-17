@@ -5,10 +5,10 @@ import com.sparta.spartablog.dto.BlogResponseDto;
 import com.sparta.spartablog.entity.Blog;
 import com.sparta.spartablog.repository.BlogRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.type.TrueFalseType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,5 +44,20 @@ public class BlogService {
         Blog blog = new Blog(requestDto);
         blogRepository.save(blog); //save 함수를 통해 저장
         return blog;
+    }
+
+    @Transactional
+    public BlogResponseDto updateBlog(Long id, BlogRequestDto requestDto){
+        //해당 id에 맞는 데이터가 존재하는지 확인
+        Blog blog = blogRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+        );
+
+        if (requestDto.getPassword().equals(blog.getPassword())){
+            blog.update(requestDto);
+            return new BlogResponseDto(blog);
+        } else {
+            return new BlogResponseDto(blog);
+        }
     }
 }

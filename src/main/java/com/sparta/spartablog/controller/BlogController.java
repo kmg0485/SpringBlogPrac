@@ -28,9 +28,15 @@ public class BlogController {
         return blogService.getBlog(id);
     }
 
-
     @PostMapping("/create") // http://localhost:8080/blog/create
     public Blog createBlog(@RequestBody BlogRequestDto requestDto) { //객체형식으로 넘어오기때문에 Body 사용
+
         return blogService.createBlog(requestDto);
+    }
+
+    @PutMapping("/list/{id}") // http://localhost:8080/blog/list/2
+    public BlogResponseDto updateBlog(@PathVariable Long id, @RequestBody BlogRequestDto requestDto) {
+        // 수정하기 위해 받아온 id를 사용하여 해당 게시글의 인스턴스가 존재하는지 확인하고 가져옴
+            return blogService.updateBlog(id, requestDto);
     }
 }
