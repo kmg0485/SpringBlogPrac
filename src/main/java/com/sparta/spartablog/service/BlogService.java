@@ -1,5 +1,6 @@
 package com.sparta.spartablog.service;
 
+import com.sparta.spartablog.dto.BlogDeleteDto;
 import com.sparta.spartablog.dto.BlogRequestDto;
 import com.sparta.spartablog.dto.BlogResponseDto;
 import com.sparta.spartablog.entity.Blog;
@@ -59,5 +60,19 @@ public class BlogService {
         } else {
             return new BlogResponseDto(blog);
         }
+    }
+
+    public BlogDeleteDto blogDelete(Long id, BlogRequestDto blogRequestDto) {
+        Blog blog = blogRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
+        );
+        BlogDeleteDto blogDeleteDto = new BlogDeleteDto();
+        if (blogRequestDto.getPassword().equals(blog.getPassword())) {
+            blogRepository.deleteById(id);
+            blogDeleteDto.setMessage("삭제 성공");
+        } else {
+            blogDeleteDto.setMessage("삭제 실패");
+        }
+        return blogDeleteDto;
     }
 }
