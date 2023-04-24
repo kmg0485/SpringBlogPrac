@@ -23,29 +23,29 @@ public class Blog extends Timestamped{
     @Column(nullable = false)
     private String content;
 
-    @Column(nullable = false)
-    private String password;
+//    @Column(nullable = false)
+//    private String password;
 
-    public Blog(String title, String username, String content, String password) {
-        this.title = title;
-        this.username = username;
-        this.content = content;
-        this.password = password;
-    }
+//    public Blog(String title, String username, String content, String password) {
+//        this.title = title;
+//        this.username = username;
+//        this.content = content;
+////        this.password = password;
+//    }
 
-    public Blog(BlogRequestDto requestDto) {
+    public Blog(BlogRequestDto requestDto, String username) {
         //오버로딩된 생성자를 통해서 주입
         //dto에 private임에도 불구하고 getter 메서드를 사용하여 데이터를 가져옴.
         this.title = requestDto.getTitle();
-        this.username = requestDto.getUsername();
         this.content = requestDto.getContent();
-        this.password = requestDto.getPassword();
+        this.username = username;
+//        this.password = requestDto.getPassword();
     }
 
-    public void update(BlogRequestDto requestDto) {
+    public void update(BlogRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
-        this.username = requestDto.getUsername();
         this.content = requestDto.getContent();
-        this.password = requestDto.getPassword();
+        this.username = username;
+//        this.password = requestDto.getPassword();
     }
 }
