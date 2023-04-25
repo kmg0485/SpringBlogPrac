@@ -13,7 +13,6 @@ public class BlogResponseDto {
     private String title;
     private String username;
     private String content;
-//    private String password;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
@@ -23,7 +22,6 @@ public class BlogResponseDto {
         this.title = blog.getTitle();
         this.username = blog.getUsername();
         this.content = blog.getContent();
-//        this.password = blog.getPassword();
         this.createdAt=blog.getCreatedAt();
         this.modifiedAt=blog.getModifiedAt();
     }

@@ -23,15 +23,6 @@ public class Blog extends Timestamped{
     @Column(nullable = false)
     private String content;
 
-//    @Column(nullable = false)
-//    private String password;
-
-//    public Blog(String title, String username, String content, String password) {
-//        this.title = title;
-//        this.username = username;
-//        this.content = content;
-////        this.password = password;
-//    }
 
     public Blog(BlogRequestDto requestDto, String username) {
         //오버로딩된 생성자를 통해서 주입
@@ -39,13 +30,11 @@ public class Blog extends Timestamped{
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.username = username;
-//        this.password = requestDto.getPassword();
     }
 
     public void update(BlogRequestDto requestDto, String username) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.username = username;
-//        this.password = requestDto.getPassword();
     }
 }
