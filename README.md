@@ -53,7 +53,7 @@
 
 
 ## 2. ERD
-![CRUD_project](https://user-images.githubusercontent.com/87196958/206372026-378bc05c-7d1c-4558-a826-e89f17ea8114.png)
+<img width="876" alt="스크린샷 2023-04-25 09 47 47" src="https://user-images.githubusercontent.com/108252926/234148181-e2454ddb-e032-4161-8ce4-ba298ced379a.png">
 
 
 ## 3. API 명세서
