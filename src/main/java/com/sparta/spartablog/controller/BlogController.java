@@ -1,13 +1,14 @@
 package com.sparta.spartablog.controller;
 
-import com.sparta.spartablog.dto.*;
-import com.sparta.spartablog.entity.Blog;
+import com.sparta.spartablog.dto.BlogListResponseDto;
+import com.sparta.spartablog.dto.BlogOneResponseDto;
+import com.sparta.spartablog.dto.BlogRequestDto;
+import com.sparta.spartablog.dto.SuccessResponseDto;
 import com.sparta.spartablog.service.BlogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

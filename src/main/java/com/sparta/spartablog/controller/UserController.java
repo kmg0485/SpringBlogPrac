@@ -19,13 +19,13 @@ public class UserController {
     private final UserService userService;
 
     // 회원 가입(아이디 중복검사 포함)
-    @PostMapping ("/signup")
+    @PostMapping ("/signup") // http://localhost:8080/user/signup
     public SuccessResponseDto signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
         return userService.signup(signupRequestDto);
     }
 
     // 로그인(성공시 토큰 발급)
-    @PostMapping("/login")
+    @PostMapping("/login") // http://localhost:8080/user/login
     public SuccessResponseDto login(
             @RequestBody LoginRequestDto loginRequestDto, HttpServletResponse response) {
         return userService.login(loginRequestDto, response);

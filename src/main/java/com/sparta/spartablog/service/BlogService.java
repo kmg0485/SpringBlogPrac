@@ -12,10 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service //서비스 부분임을 알려줌
 @RequiredArgsConstructor
@@ -26,11 +24,6 @@ public class BlogService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-//    public List<BlogResponseDto> getBlogList() {
-        //테이블에 저장되어있는 모든 게시글 조회
-        //뽑아온 데이터를 map을 통해 responsedto로 가공, collect가 list 타입으로 묶어줌.
-//        return blogRepository.findAllByOrderByModifiedAtDesc().stream().map(BlogResponseDto::new).collect(Collectors.toList());
-//    }
     public BlogListResponseDto getBlogList() {
         BlogListResponseDto blogListResponseDto = new BlogListResponseDto(true, HttpStatus.OK.value());
         List<Blog> blogList = blogRepository.findAllByOrderByModifiedAtDesc();
@@ -48,26 +41,7 @@ public class BlogService {
         );
         return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog);
     }
-//    public BlogResponseDto getBlog(Long id) {
-//        //조회하기 위해 받아온 blog의 id를 사용해서 해당 blog 인스턴스가 존재하는지 확인하고 데이터를 가져옴
-//        Blog blog = checkBlog(id);
-//
-//        return new BlogResponseDto(blog);
-//    }
-//
-//    private Blog checkBlog(Long id) {
-//        return blogRepository.findById(id).orElseThrow(
-//                //예외처리?
-//                () -> new NullPointerException("해당 글이 존재하지 않습니다.")
-//        );
-//    }
 
-//    @Transactional
-//    public Blog createBlog(BlogRequestDto requestDto) {
-//        Blog blog = new Blog(requestDto);
-//        blogRepository.save(blog); //save 함수를 통해 저장
-//        return blog;
-//    }
 
     @Transactional
     public BlogOneResponseDto createBlog(BlogRequestDto requestDto, HttpServletRequest request) {
@@ -95,17 +69,13 @@ public class BlogService {
             return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog);
 
         } else {
-            return  null;
+            return null;
         }
 
     }
 
     @Transactional
-    public SuccessResponseDto updateBlog(Long id, BlogRequestDto requestDto, HttpServletRequest request){
-        //해당 id에 맞는 데이터가 존재하는지 확인
-//        Blog blog = blogRepository.findById(id).orElseThrow(
-//                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
-//        );
+    public SuccessResponseDto updateBlog(Long id, BlogRequestDto requestDto, HttpServletRequest request) {
 
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
@@ -140,9 +110,7 @@ public class BlogService {
     }
 
     public SuccessResponseDto deleteBlog(Long id, HttpServletRequest request) {
-//        Blog blog = blogRepository.findById(id).orElseThrow(
-//                () -> new IllegalArgumentException("존재하지 않는 게시글입니다.")
-//        );
+
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;

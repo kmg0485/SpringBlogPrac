@@ -1,12 +1,12 @@
 # Spring Boot CRUD API
 
-- [1️⃣ 주특기 입문 주차](https://github.com/kmg0485/SpringBlogPrac/tree/week1)
-- [2️⃣ 주특기 숙련 주차](https://github.com/kmg0485/SpringBlogPrac/tree/week2)
-- 3️⃣ 주특기 심화 주차
+- [주특기 입문 주차](https://github.com/kmg0485/SpringBlogPrac/tree/week1)
+- [주특기 숙련 주차](https://github.com/kmg0485/SpringBlogPrac/tree/week2)
+- 주특기 심화 주차
   <br>
 
-## 2️⃣ 주특기 숙련 주차
-> 🚩 Goal: 회원가입, 로그인, 댓글 작성/조회/수정/삭제 기능이 추가된 나만의 항해 블로그 백엔드 서버 만들기
+## 주특기 숙련 주차
+> 🚩 회원가입, 로그인, 댓글 작성/조회/수정/삭제 기능이 추가된 나만의 항해 블로그 백엔드 서버 만들기
 
 ## 📝 목차
 1. [서비스 완성 요구사항](#1-서비스-완성-요구사항)
@@ -58,7 +58,7 @@
 
 ## 3. API 명세서
 
-[👉Postman API 명세서👈](https://documenter.getpostman.com/view/24030373/2s93Y5RLoy)
+[Postman API 명세서](https://documenter.getpostman.com/view/24030373/2s93Y5RLoy)
 
-[👉Notion API 명세서👈](https://www.notion.so/85c27fdf7d164109a0ce77c2a14a9670?v=2319a9aa372841bb9945b1a9fe40da5e)
+[Notion API 명세서](https://www.notion.so/85c27fdf7d164109a0ce77c2a14a9670?v=2319a9aa372841bb9945b1a9fe40da5e)
 
