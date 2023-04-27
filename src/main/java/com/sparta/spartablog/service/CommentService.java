@@ -1,11 +1,14 @@
 package com.sparta.spartablog.service;
 
-import com.sparta.spartablog.dto.*;
+import com.sparta.spartablog.dto.CommentOneResponseDto;
+import com.sparta.spartablog.dto.CommentRequestDto;
+import com.sparta.spartablog.dto.SuccessResponseDto;
 import com.sparta.spartablog.entity.Blog;
 import com.sparta.spartablog.entity.Comment;
 import com.sparta.spartablog.entity.User;
 import com.sparta.spartablog.jwt.JwtUtil;
 import com.sparta.spartablog.repository.BlogRepository;
+import com.sparta.spartablog.repository.CommentRepository;
 import com.sparta.spartablog.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -14,54 +17,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 
-@Service //서비스 부분임을 알려줌
+@Service
 @RequiredArgsConstructor
-public class BlogService {
-    //데이터베이스와 연결을 하기위하여 데이터베이스와 연결하는 부분인 BlogRepository를 사용할 수 있도록 추가
-    public final BlogRepository blogRepository;
+public class CommentService {
+
+    private final CommentRepository commentRepository;
+    private final BlogRepository blogRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
+    // 로그인한 회원이 댓글을 등록
     @Transactional
-    public BlogListResponseDto getBlogList() {
-        BlogListResponseDto blogListResponseDto = new BlogListResponseDto(true, HttpStatus.OK.value());
-        List<Blog> blogList = blogRepository.findAllByOrderByModifiedAtDesc();
-        for (Blog blog : blogList) {
-            List<CommentResponseDto> commentList = new ArrayList<>();
-            for (Comment comment : blog.getComments()) {
-                commentList.add(new CommentResponseDto(comment));
-            }
-            blogListResponseDto.addBlog(new BlogResponseDto(blog, commentList));
-        }
-        return blogListResponseDto;
-    }
-
-
-
-    @Transactional(readOnly = true)
-    public BlogOneResponseDto getBlog(Long id) {
+    public SuccessResponseDto createComment(Long id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        // 게시글의 DB 저장 유무 확인
         Blog blog = blogRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
         );
-        List<CommentResponseDto> commentList = new ArrayList<>();
-        for (Comment comment : blog.getComments()) {
-            commentList.add(new CommentResponseDto(comment));
-        }
-        return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog, commentList);
-    }
 
-
-
-    @Transactional
-    public BlogOneResponseDto createBlog(BlogRequestDto requestDto, HttpServletRequest request) {
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
-        // 토큰이 있는 경우에만 게시글 작성 가능
+        // 토큰이 있는 경우에만 댓글 작성 가능
         if (token != null) {
             if (jwtUtil.validateToken(token)) {
                 // 토큰에서 사용자 정보 가져오기
@@ -76,24 +54,27 @@ public class BlogService {
             );
 
             // 요청 받은 DTO로 DB에 저장할 객체 만들기
-            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user.getUsername()));
+            Comment comment = commentRepository.save(new Comment(commentRequestDto, user.getUsername(), blog));
 
-            return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog);
+            return new CommentOneResponseDto(true, HttpStatus.OK.value(), comment);
 
         } else {
-            return null;
+            return  null;
         }
-
     }
 
     @Transactional
-    public SuccessResponseDto updateBlog(Long id, BlogRequestDto requestDto, HttpServletRequest request) {
+    public SuccessResponseDto updateComment(Long blogId, Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
+        // 게시글의 DB 저장 유무 확인
+        Blog blog = blogRepository.findById(blogId).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+        );
 
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
-        // 토큰이 있는 경우에만 게시글 수정 가능
+        // 토큰이 있는 경우에만 댓글 수정 가능
         if (token != null) {
             if (jwtUtil.validateToken(token)) {
                 // 토큰에서 사용자 정보 가져오기
@@ -107,33 +88,33 @@ public class BlogService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 입력 받은 id, 토큰에서 가져온 username과 일치하는 DB 조회
-            Blog blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+            // 댓글의 DB 저장 유무 확인
+            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
             );
-            blog.update(requestDto, user.getUsername());
 
-            List<CommentResponseDto> commentList = new ArrayList<>();
-            for (Comment comment : blog.getComments()) {
-                commentList.add(new CommentResponseDto(comment));
-            }
+            // 요청 받은 DTO로 DB에 저장할 객체 만들기
+            comment.update(commentRequestDto);
 
-            return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog, commentList);
+            return new CommentOneResponseDto(true, HttpStatus.OK.value(), comment);
 
         } else {
-            return new SuccessResponseDto(false, HttpStatus.NOT_FOUND.value());
+            return  null;
         }
-
     }
 
-
-    public SuccessResponseDto deleteBlog(Long id, HttpServletRequest request) {
+    @Transactional
+    public SuccessResponseDto deleteComment(Long blogId, Long commentId, HttpServletRequest request) {
+        // 게시글의 DB 저장 유무 확인
+        Blog blog = blogRepository.findById(blogId).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+        );
 
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
 
-        // 토큰이 있는 경우에만 게시글 수정 가능
+        // 토큰이 있는 경우에만 댓글 수정 가능
         if (token != null) {
             if (jwtUtil.validateToken(token)) {
                 // 토큰에서 사용자 정보 가져오기
@@ -147,11 +128,13 @@ public class BlogService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 입력 받은 id, 토큰에서 가져온 username과 일치하는 DB 조회
-            Blog blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+            // 댓글의 DB 저장 유무 확인
+            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
             );
-            blogRepository.deleteById(id);
+
+            // 요청 받은 DTO로 DB에 저장할 객체 만들기
+            commentRepository.deleteById(commentId);
 
             return new SuccessResponseDto(true, HttpStatus.OK.value());
 
