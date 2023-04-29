@@ -14,7 +14,6 @@ public class BlogListResponseDto extends SuccessResponseDto{
     }
 
     public void addBlog(BlogResponseDto blogResponseDto) {
-
         blogList.add(blogResponseDto);
     }
 }
