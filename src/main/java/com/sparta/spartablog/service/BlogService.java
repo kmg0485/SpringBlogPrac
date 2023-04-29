@@ -4,6 +4,7 @@ import com.sparta.spartablog.dto.*;
 import com.sparta.spartablog.entity.Blog;
 import com.sparta.spartablog.entity.Comment;
 import com.sparta.spartablog.entity.User;
+import com.sparta.spartablog.entity.UserRoleEnum;
 import com.sparta.spartablog.jwt.JwtUtil;
 import com.sparta.spartablog.repository.BlogRepository;
 import com.sparta.spartablog.repository.UserRepository;
@@ -107,11 +108,25 @@ public class BlogService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 입력 받은 id, 토큰에서 가져온 username과 일치하는 DB 조회
-            Blog blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
-            );
-            blog.update(requestDto, user.getUsername());
+            // 사용자 권한 가져와서 ADMIN 이면 무조건 수정 가능, USER 면 본인이 작성한 글일 때만 수정 가능
+            UserRoleEnum userRoleEnum = user.getRole();
+
+            Blog blog;
+
+            if (userRoleEnum == UserRoleEnum.ADMIN) {
+                // 입력 받은 게시글 id와 일치하는 DB 조회
+                blog = blogRepository.findById(id).orElseThrow(
+                        () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                );
+
+            } else {
+                // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
+                blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
+                        () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+                );
+            }
+
+            blog.update(requestDto);
 
             List<CommentResponseDto> commentList = new ArrayList<>();
             for (Comment comment : blog.getComments()) {
@@ -147,10 +162,24 @@ public class BlogService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 입력 받은 id, 토큰에서 가져온 username과 일치하는 DB 조회
-            Blog blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
-            );
+            // 사용자 권한 가져와서 ADMIN 이면 무조건 삭제 가능, USER 면 본인이 작성한 글일 때만 삭제 가능
+            UserRoleEnum userRoleEnum = user.getRole();
+
+            Blog blog;
+
+            if (userRoleEnum == UserRoleEnum.ADMIN) {
+                // 입력 받은 게시글 id와 일치하는 DB 조회
+                blog = blogRepository.findById(id).orElseThrow(
+                        () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                );
+
+            } else {
+                // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
+                blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
+                        () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+                );
+            }
+
             blogRepository.deleteById(id);
 
             return new SuccessResponseDto(true, HttpStatus.OK.value());
