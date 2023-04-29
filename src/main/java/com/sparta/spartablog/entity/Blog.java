@@ -40,10 +40,9 @@ public class Blog extends Timestamped{
         this.username = username;
     }
 
-    public void update(BlogRequestDto requestDto, String username) {
+    public void update(BlogRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.username = username;
     }
 
     public void createComment(Comment comment) {

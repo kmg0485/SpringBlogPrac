@@ -6,6 +6,7 @@ import com.sparta.spartablog.dto.SuccessResponseDto;
 import com.sparta.spartablog.entity.Blog;
 import com.sparta.spartablog.entity.Comment;
 import com.sparta.spartablog.entity.User;
+import com.sparta.spartablog.entity.UserRoleEnum;
 import com.sparta.spartablog.jwt.JwtUtil;
 import com.sparta.spartablog.repository.BlogRepository;
 import com.sparta.spartablog.repository.CommentRepository;
@@ -88,12 +89,27 @@ public class CommentService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 댓글의 DB 저장 유무 확인
-            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
-            );
+//            // 댓글의 DB 저장 유무 확인
+//            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+//                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+//            );
+            // 사용자 권한 가져와서 ADMIN 이면 무조건 수정 가능, USER 면 본인이 작성한 댓글일 때만 수정 가능
+            UserRoleEnum userRoleEnum = user.getRole();
+            Comment comment;
 
-            // 요청 받은 DTO로 DB에 저장할 객체 만들기
+            if (userRoleEnum == UserRoleEnum.ADMIN) {
+                // 입력 받은 댓글 id와 일치하는 DB 조회
+                comment = commentRepository.findById(commentId).orElseThrow(
+                        () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+                );
+            } else {
+                // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
+                comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                        () -> new IllegalArgumentException("해당하는 댓글이 존재하지 않습니다.")
+                );
+            }
+
+            // 요청 받은 DTO로 DB에 업데이트
             comment.update(commentRequestDto);
 
             return new CommentOneResponseDto(true, HttpStatus.OK.value(), comment);
@@ -128,14 +144,28 @@ public class CommentService {
                     () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
             );
 
-            // 댓글의 DB 저장 유무 확인
-            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
-                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
-            );
+//            // 댓글의 DB 저장 유무 확인
+//            Comment comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+//                    () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+//            );
+            // 사용자 권한 가져와서 ADMIN 이면 무조건 수정 가능, USER 면 본인이 작성한 댓글일 때만 수정 가능
+            UserRoleEnum userRoleEnum = user.getRole();
 
-            // 요청 받은 DTO로 DB에 저장할 객체 만들기
-            commentRepository.deleteById(commentId);
+            Comment comment;
 
+            if (userRoleEnum == UserRoleEnum.ADMIN) {
+                // 입력 받은 댓글 id와 일치하는 DB 조회
+                comment = commentRepository.findById(commentId).orElseThrow(
+                        () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+                );
+            } else {
+                // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
+                comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                        () -> new IllegalArgumentException("해당하는 댓글이 존재하지 않습니다.")
+                );
+            }
+
+            // 해당 댓글 삭제
             return new SuccessResponseDto(true, HttpStatus.OK.value());
 
         } else {
