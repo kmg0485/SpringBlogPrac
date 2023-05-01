@@ -12,7 +12,6 @@
 1. [서비스 완성 요구사항](#1-서비스-완성-요구사항)
 2. [ERD](#2-ERD)
 3. [API 명세서](#3-API-명세서)
-4. [Trouble Shooting](#4-Trouble-Shooting)
 
 ## 1. 서비스 완성 요구사항
 
@@ -60,5 +59,5 @@
 
 [Postman API 명세서](https://documenter.getpostman.com/view/24030373/2s93Y5RLoy)
 
-[Notion API 명세서](https://www.notion.so/85c27fdf7d164109a0ce77c2a14a9670?v=2319a9aa372841bb9945b1a9fe40da5e)
+[Notion API 명세서](https://www.notion.so/85c27fdf7d164109a0ce77c2a14a9670?v=681d64a82fe34ab9abf4ee78cd8534ea)
 
