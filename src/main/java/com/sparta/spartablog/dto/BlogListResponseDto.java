@@ -9,8 +9,8 @@ import java.util.List;
 public class BlogListResponseDto extends SuccessResponseDto{
     List<BlogResponseDto> blogList = new ArrayList<>();
 
-    public BlogListResponseDto(Boolean success, int statusCode) {
-        super(success, statusCode);
+    public BlogListResponseDto(StatusEnum status) {
+        super(status);
     }
 
     public void addBlog(BlogResponseDto blogResponseDto) {
