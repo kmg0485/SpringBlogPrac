@@ -10,13 +10,13 @@ public class BlogOneResponseDto extends SuccessResponseDto{
 
     private BlogResponseDto blogOne;
 
-    public BlogOneResponseDto(Boolean success, int statusCode, Blog blog) {
-        super(success, statusCode);
+    public BlogOneResponseDto(StatusEnum status, Blog blog) {
+        super(status);
         this.blogOne = new BlogResponseDto(blog);
     }
 
-    public BlogOneResponseDto(Boolean success, int statusCode, Blog blog, List<CommentResponseDto> commentList) {
-        super(success, statusCode);
+    public BlogOneResponseDto(StatusEnum status, Blog blog, List<CommentResponseDto> commentList) {
+        super(status);
         this.blogOne = new BlogResponseDto(blog, commentList);
     }
 }

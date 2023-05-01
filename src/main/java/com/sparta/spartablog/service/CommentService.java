@@ -2,6 +2,7 @@ package com.sparta.spartablog.service;
 
 import com.sparta.spartablog.dto.CommentOneResponseDto;
 import com.sparta.spartablog.dto.CommentRequestDto;
+import com.sparta.spartablog.dto.StatusEnum;
 import com.sparta.spartablog.dto.SuccessResponseDto;
 import com.sparta.spartablog.entity.Blog;
 import com.sparta.spartablog.entity.Comment;
@@ -11,13 +12,15 @@ import com.sparta.spartablog.jwt.JwtUtil;
 import com.sparta.spartablog.repository.BlogRepository;
 import com.sparta.spartablog.repository.CommentRepository;
 import com.sparta.spartablog.repository.UserRepository;
+import com.sparta.spartablog.util.exception.CustomException;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static com.sparta.spartablog.util.exception.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class CommentService {
     public SuccessResponseDto createComment(Long id, CommentRequestDto commentRequestDto, HttpServletRequest request) {
         // 게시글의 DB 저장 유무 확인
         Blog blog = blogRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                () -> new CustomException(NOT_FOUND_BLOG)
         );
 
         // Request에서 토큰 가져오기
@@ -46,21 +49,22 @@ public class CommentService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
             // 요청 받은 DTO로 DB에 저장할 객체 만들기
             Comment comment = commentRepository.save(new Comment(commentRequestDto, user.getUsername(), blog));
 
-            return new CommentOneResponseDto(true, HttpStatus.OK.value(), comment);
+            return new CommentOneResponseDto(StatusEnum.OK, comment);
 
         } else {
-            return  null;
+            throw new CustomException(INVALID_TOKEN);
+
         }
     }
 
@@ -68,7 +72,7 @@ public class CommentService {
     public SuccessResponseDto updateComment(Long blogId, Long commentId, CommentRequestDto commentRequestDto, HttpServletRequest request) {
         // 게시글의 DB 저장 유무 확인
         Blog blog = blogRepository.findById(blogId).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                () -> new CustomException(NOT_FOUND_BLOG)
         );
 
         // Request에서 토큰 가져오기
@@ -81,12 +85,12 @@ public class CommentService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
 //            // 댓글의 DB 저장 유무 확인
@@ -100,22 +104,23 @@ public class CommentService {
             if (userRoleEnum == UserRoleEnum.ADMIN) {
                 // 입력 받은 댓글 id와 일치하는 DB 조회
                 comment = commentRepository.findById(commentId).orElseThrow(
-                        () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+                        () -> new CustomException(NOT_FOUND_COMMENT)
                 );
             } else {
                 // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
                 comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
-                        () -> new IllegalArgumentException("해당하는 댓글이 존재하지 않습니다.")
+                        () -> new CustomException(AUTHORIZATION)
                 );
             }
 
             // 요청 받은 DTO로 DB에 업데이트
             comment.update(commentRequestDto);
 
-            return new CommentOneResponseDto(true, HttpStatus.OK.value(), comment);
+            return new CommentOneResponseDto(StatusEnum.OK, comment);
 
         } else {
-            return  null;
+            throw new CustomException(INVALID_TOKEN);
+
         }
     }
 
@@ -123,7 +128,7 @@ public class CommentService {
     public SuccessResponseDto deleteComment(Long blogId, Long commentId, HttpServletRequest request) {
         // 게시글의 DB 저장 유무 확인
         Blog blog = blogRepository.findById(blogId).orElseThrow(
-                () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                () -> new CustomException(NOT_FOUND_BLOG)
         );
 
         // Request에서 토큰 가져오기
@@ -136,12 +141,12 @@ public class CommentService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
 //            // 댓글의 DB 저장 유무 확인
@@ -156,20 +161,20 @@ public class CommentService {
             if (userRoleEnum == UserRoleEnum.ADMIN) {
                 // 입력 받은 댓글 id와 일치하는 DB 조회
                 comment = commentRepository.findById(commentId).orElseThrow(
-                        () -> new IllegalArgumentException("댓글이 존재하지 않습니다.")
+                        () -> new CustomException(NOT_FOUND_COMMENT)
                 );
             } else {
                 // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
                 comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
-                        () -> new IllegalArgumentException("해당하는 댓글이 존재하지 않습니다.")
+                        () -> new CustomException(AUTHORIZATION)
                 );
             }
 
             // 해당 댓글 삭제
-            return new SuccessResponseDto(true, HttpStatus.OK.value());
+            return new SuccessResponseDto(StatusEnum.OK);
 
         } else {
-            return new SuccessResponseDto(false, HttpStatus.NOT_FOUND.value());
+            throw new CustomException(INVALID_TOKEN);
         }
     }
 }

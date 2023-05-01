@@ -8,15 +8,17 @@ import com.sparta.spartablog.entity.UserRoleEnum;
 import com.sparta.spartablog.jwt.JwtUtil;
 import com.sparta.spartablog.repository.BlogRepository;
 import com.sparta.spartablog.repository.UserRepository;
+import com.sparta.spartablog.util.exception.CustomException;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.sparta.spartablog.util.exception.ErrorCode.*;
 
 @Service //서비스 부분임을 알려줌
 @RequiredArgsConstructor
@@ -27,8 +29,8 @@ public class BlogService {
     private final JwtUtil jwtUtil;
 
     @Transactional
-    public BlogListResponseDto getBlogList() {
-        BlogListResponseDto blogListResponseDto = new BlogListResponseDto(true, HttpStatus.OK.value());
+    public SuccessResponseDto getBlogList() {
+        BlogListResponseDto blogListResponseDto = new BlogListResponseDto(StatusEnum.OK);
         List<Blog> blogList = blogRepository.findAllByOrderByModifiedAtDesc();
         for (Blog blog : blogList) {
             List<CommentResponseDto> commentList = new ArrayList<>();
@@ -45,19 +47,19 @@ public class BlogService {
     @Transactional(readOnly = true)
     public BlogOneResponseDto getBlog(Long id) {
         Blog blog = blogRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+                () -> new CustomException(NOT_FOUND_USER)
         );
         List<CommentResponseDto> commentList = new ArrayList<>();
         for (Comment comment : blog.getComments()) {
             commentList.add(new CommentResponseDto(comment));
         }
-        return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog, commentList);
+        return new BlogOneResponseDto(StatusEnum.OK, blog, commentList);
     }
 
 
 
     @Transactional
-    public BlogOneResponseDto createBlog(BlogRequestDto requestDto, HttpServletRequest request) {
+    public SuccessResponseDto createBlog(BlogRequestDto requestDto, HttpServletRequest request) {
         // Request에서 토큰 가져오기
         String token = jwtUtil.resolveToken(request);
         Claims claims;
@@ -68,21 +70,22 @@ public class BlogService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
             // 요청 받은 DTO로 DB에 저장할 객체 만들기
             Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user.getUsername()));
 
-            return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog);
+            return new BlogOneResponseDto(StatusEnum.OK, blog);
 
         } else {
-            return null;
+            throw new CustomException(INVALID_TOKEN);
+
         }
 
     }
@@ -100,12 +103,12 @@ public class BlogService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
             // 사용자 권한 가져와서 ADMIN 이면 무조건 수정 가능, USER 면 본인이 작성한 글일 때만 수정 가능
@@ -116,13 +119,13 @@ public class BlogService {
             if (userRoleEnum == UserRoleEnum.ADMIN) {
                 // 입력 받은 게시글 id와 일치하는 DB 조회
                 blog = blogRepository.findById(id).orElseThrow(
-                        () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                        () -> new CustomException(NOT_FOUND_BLOG)
                 );
 
             } else {
                 // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
                 blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                        () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+                        () -> new CustomException(AUTHORIZATION)
                 );
             }
 
@@ -133,10 +136,11 @@ public class BlogService {
                 commentList.add(new CommentResponseDto(comment));
             }
 
-            return new BlogOneResponseDto(true, HttpStatus.OK.value(), blog, commentList);
+            return new BlogOneResponseDto(StatusEnum.OK, blog, commentList);
 
         } else {
-            return new SuccessResponseDto(false, HttpStatus.NOT_FOUND.value());
+            throw new CustomException(INVALID_TOKEN);
+
         }
 
     }
@@ -154,12 +158,12 @@ public class BlogService {
                 // 토큰에서 사용자 정보 가져오기
                 claims = jwtUtil.getUserInfoFromToken(token);
             } else {
-                throw new IllegalArgumentException("Token Error");
+                throw new CustomException(INVALID_TOKEN);
             }
 
             // 토큰에서 가져온 사용자 정보를 사용하여 DB 조회
             User user = userRepository.findByUsername(claims.getSubject()).orElseThrow(
-                    () -> new IllegalArgumentException("사용자가 존재하지 않습니다.")
+                    () -> new CustomException(NOT_FOUND_USER)
             );
 
             // 사용자 권한 가져와서 ADMIN 이면 무조건 삭제 가능, USER 면 본인이 작성한 글일 때만 삭제 가능
@@ -170,22 +174,23 @@ public class BlogService {
             if (userRoleEnum == UserRoleEnum.ADMIN) {
                 // 입력 받은 게시글 id와 일치하는 DB 조회
                 blog = blogRepository.findById(id).orElseThrow(
-                        () -> new IllegalArgumentException("게시글이 존재하지 않습니다.")
+                        () -> new CustomException(NOT_FOUND_BLOG)
                 );
 
             } else {
                 // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
                 blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
-                        () -> new IllegalArgumentException("해당하는 게시글이 존재하지 않습니다.")
+                        () -> new CustomException(AUTHORIZATION)
                 );
             }
 
             blogRepository.deleteById(id);
 
-            return new SuccessResponseDto(true, HttpStatus.OK.value());
+            return new SuccessResponseDto(StatusEnum.OK);
 
         } else {
-            return new SuccessResponseDto(false, HttpStatus.NOT_FOUND.value());
+            throw new CustomException(INVALID_TOKEN);
+
         }
     }
 }
