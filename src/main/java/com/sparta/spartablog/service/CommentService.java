@@ -58,7 +58,7 @@ public class CommentService {
             );
 
             // 요청 받은 DTO로 DB에 저장할 객체 만들기
-            Comment comment = commentRepository.save(new Comment(commentRequestDto, user.getUsername(), blog));
+            Comment comment = commentRepository.save(new Comment(commentRequestDto, blog, user));
 
             return new CommentOneResponseDto(StatusEnum.OK, comment);
 
@@ -107,8 +107,8 @@ public class CommentService {
                         () -> new CustomException(NOT_FOUND_COMMENT)
                 );
             } else {
-                // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
-                comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                // 입력 받은 댓글 id, 토큰에서 가져온 userId과 일치하는 DB 조회
+                comment = commentRepository.findByIdAndUserId(commentId, user.getId()).orElseThrow(
                         () -> new CustomException(AUTHORIZATION)
                 );
             }
@@ -164,8 +164,8 @@ public class CommentService {
                         () -> new CustomException(NOT_FOUND_COMMENT)
                 );
             } else {
-                // 입력 받은 댓글 id, 토큰에서 가져온 username과 일치하는 DB 조회
-                comment = commentRepository.findByIdAndUsername(commentId, user.getUsername()).orElseThrow(
+                // 입력 받은 댓글 id, 토큰에서 가져온 userId과 일치하는 DB 조회
+                comment = commentRepository.findByIdAndUserId(commentId, user.getId()).orElseThrow(
                         () -> new CustomException(AUTHORIZATION)
                 );
             }

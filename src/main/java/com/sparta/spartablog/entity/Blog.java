@@ -16,6 +16,10 @@ public class Blog extends Timestamped{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "USER_ID", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     private String title;
 
@@ -32,12 +36,13 @@ public class Blog extends Timestamped{
     private List<Comment> comments = new ArrayList<>();
 
 
-    public Blog(BlogRequestDto requestDto, String username) {
+    public Blog(BlogRequestDto requestDto, User user) {
         //오버로딩된 생성자를 통해서 주입
         //dto에 private임에도 불구하고 getter 메서드를 사용하여 데이터를 가져옴.
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.username = username;
+        this.user = user;
     }
 
     public void update(BlogRequestDto requestDto) {

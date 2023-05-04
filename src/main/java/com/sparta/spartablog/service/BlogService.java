@@ -79,7 +79,7 @@ public class BlogService {
             );
 
             // 요청 받은 DTO로 DB에 저장할 객체 만들기
-            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user.getUsername()));
+            Blog blog = blogRepository.saveAndFlush(new Blog(requestDto, user));
 
             return new BlogOneResponseDto(StatusEnum.OK, blog);
 
@@ -123,8 +123,8 @@ public class BlogService {
                 );
 
             } else {
-                // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
-                blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
+                // 입력 받은 게시글 id, 토큰에서 가져온 userId과 일치하는 DB 조회
+                blog = blogRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
                         () -> new CustomException(AUTHORIZATION)
                 );
             }
@@ -179,7 +179,7 @@ public class BlogService {
 
             } else {
                 // 입력 받은 게시글 id, 토큰에서 가져온 username과 일치하는 DB 조회
-                blog = blogRepository.findByIdAndUsername(id, user.getUsername()).orElseThrow(
+                blog = blogRepository.findByIdAndUserId(id, user.getId()).orElseThrow(
                         () -> new CustomException(AUTHORIZATION)
                 );
             }

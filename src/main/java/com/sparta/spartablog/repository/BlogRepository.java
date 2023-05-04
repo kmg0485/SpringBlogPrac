@@ -10,5 +10,5 @@ import java.util.Optional;
 //테이블 연결(Jparepo 상속)
 public interface BlogRepository extends JpaRepository<Blog, Long> {
     List<Blog> findAllByOrderByModifiedAtDesc(); //내림차순으로 정렬
-    Optional<Blog> findByIdAndUsername(Long id, String username);
+    Optional<Blog> findByIdAndUserId(Long id, Long UserId);
 }
